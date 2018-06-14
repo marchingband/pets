@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html onmousemove="mm(event)">
+  <body>
+    <canvas id='c'/>
+  </body>
+  <script>
+    const ca = document.getElementById('c')
+    ca.height = window.innerHeight
+    ca.width  = window.innerWidth
+    const c = ca.getContext('2d')
+    const speed = 1
+    var mp = {x:0,y:0}
+    var objects = []
+    makeSquare=(size)=>{
+      const s = {}
+      s.d={x:speed,y:speed}
+      s.ps=[[mp.x-size,mp.y-size],[mp.x-size,mp.y+size],[mp.x+size,mp.y+size],[mp.x+size,mp.y-size]]
+      s.currentP=0
+      s.movesCount=0
+      s.color=nextColor()
+      return s
+    }
+    colorIndex=0
+    colorList=['beige','gray','brown','pink','black','orange','purple','green','yellow','blue','red']
+    nextColor=()=>{
+      colorIndex<(colorList.length-1)?colorIndex+=1:colorIndex=0
+      return colorList[colorIndex]
+    }
+    sizeIndex=0
+    sizeList=[5,40,35,15,45,10,30,25,20,50]
+    nextSize=()=>{
+      sizeIndex<(sizeList.length-1)?sizeIndex+=1:sizeIndex=0
+      return sizeList[sizeIndex]
+    }
+    moveSquare=(s)=>{
+      if(s.movesCount<3){
+        s.movesCount += 1
+      } else {
+        s.movesCount = 0
+        if(s.currentP<3){
+          s.currentP +=1
+        } else {
+          s.currentP = 0
+          s.d = {x:speed,y:speed}
+          if(s.ps[s.currentP][0] > mp.x){s.d.x = -speed}
+          if(s.ps[s.currentP][1] > mp.y){s.d.y = -speed}
+        }
+      }
+      s.ps[s.currentP][0] += s.d.x
+      s.ps[s.currentP][1] += s.d.y
+    }
+    drawOne=(o)=>{
+      c.beginPath()
+      c.moveTo(o.ps[3][0],o.ps[3][1])
+      o.ps.forEach((p)=>{
+        c.lineTo(p[0],p[1])
+      })
+      c.strokeStyle=o.color
+      c.stroke()
+    }
+    drawAll=(objects)=>{
+      c.clearRect(0,0,ca.width,ca.height)
+      objects.forEach((o)=>{drawOne(o)})
+    }
+    mm=(event)=>{mp={x:event.clientX,y:event.clientY}}
+    window.onclick=()=>{objects.push(makeSquare(nextSize()))}
+    const blob = makeSquare(50)
+    objects.push(blob)
+    tick=()=>{
+      objects.forEach((o)=>{
+        moveSquare(o)})
+      drawAll(objects)
+      window.requestAnimationFrame(tick)
+    }
+    window.requestAnimationFrame(tick)
+  </script>
+</html>
